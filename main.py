@@ -83,3 +83,25 @@ with sqlite3.connect("hw29db.db") as connection:
         );
     ''')
     cursore.executemany("INSERT INTO Books (title, year_publishing) VALUES (?, ?);", books)
+
+# cursore.execute('SELECT * FROM Books')
+# all_books = cursore.fetchall()
+# print(all_books)
+
+# cursore.execute('SELECT * FROM Authors')
+# all_authors = cursore.fetchall()
+# print(all_authors)
+
+with sqlite3.connect("hw29db.db") as connection:
+    cursore = connection.cursor()
+    cursore.execute('DROP TABLE IF EXISTS Author_book')
+    cursore.execute('''
+        CREATE TABLE "Author_book" (
+            "id"	INTEGER,
+	        "book_id"	INTEGER,
+	        "author_id"	INTEGER,
+	        PRIMARY KEY("id" AUTOINCREMENT),
+	        FOREIGN KEY("book_id") REFERENCES "Books"("id"),
+	        FOREIGN KEY("author_id") REFERENCES "Authors"("id")
+        );
+    ''')
