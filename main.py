@@ -8,21 +8,36 @@ class Author:
         self.date_birth = date_birth
         self.date_death = date_death
 
-# authors = [
-#     Autor("Jack", "London", "USA", "1876-01-12", "1916-12-22"),
-#     Autor("Alexandre", "Dumas", "France", "1802-07-24", "1870-12-05"),
-#     Autor("Honore", "de Balzac", "France", "1799-05-20", "1850-08-18"),
-#     Autor("Jules", "Verne", "France", "1828-02-08", "1905-03-24"),
-#     Autor("Franz", "Kafka", "Austria-Hungary", "1883-07-03", "1924-06-03")
-# ]
+    def __iter__(self):
+        yield self.first_name
+        yield self.last_name
+        yield self.country
+        yield self.date_birth
+        yield self.date_death
+
+aut = Author("Jack", "London", "USA", "1876-01-12", "1916-12-22")
+# aut[2]
+
+print(aut.__iter__())
+
+for a in aut:
+    print(a)
 
 authors = [
-    ("Jack", "London", "USA", "1876-01-12", "1916-12-22"),
-    ("Alexandre", "Dumas", "France", "1802-07-24", "1870-12-05"),
-    ("Honore", "de Balzac", "France", "1799-05-20", "1850-08-18"),
-    ("Jules", "Verne", "France", "1828-02-08", "1905-03-24"),
-    ("Franz", "Kafka", "Austria-Hungary", "1883-07-03", "1924-06-03")
+    tuple(Author("Jack", "London", "USA", "1876-01-12", "1916-12-22")),
+    tuple(Author("Alexandre", "Dumas", "France", "1802-07-24", "1870-12-05")),
+    tuple(Author("Honore", "de Balzac", "France", "1799-05-20", "1850-08-18")),
+    tuple(Author("Jules", "Verne", "France", "1828-02-08", "1905-03-24")),
+    tuple(Author("Franz", "Kafka", "Austria-Hungary", "1883-07-03", "1924-06-03"))
 ]
+
+# authors = [
+#     ("Jack", "London", "USA", "1876-01-12", "1916-12-22"),
+#     ("Alexandre", "Dumas", "France", "1802-07-24", "1870-12-05"),
+#     ("Honore", "de Balzac", "France", "1799-05-20", "1850-08-18"),
+#     ("Jules", "Verne", "France", "1828-02-08", "1905-03-24"),
+#     ("Franz", "Kafka", "Austria-Hungary", "1883-07-03", "1924-06-03")
+# ]
 
 with sqlite3.connect("hw29db.db") as connection:
     cursore = connection.cursor()
@@ -105,3 +120,25 @@ with sqlite3.connect("hw29db.db") as connection:
 	        FOREIGN KEY("author_id") REFERENCES "Authors"("id")
         );
     ''')
+
+def get_author_from_book(book):
+    with sqlite3.connect("hw29db.db") as connection:
+        cursore = connection.cursor()
+        cursore.execute('''SELECT * 
+                            FROM Authors
+                            WHERE id IN (
+                                SELECT author_id
+                                FROM Author_book
+                                WHERE book_id IN (
+                                    SELECT id
+                                    FROM Books
+                                    WHERE title == ?
+                                )
+                            )''', (book,))
+        return cursore.fetchone()
+
+print(get_author_from_book("Mysterious Island"))
+
+print(get_author_from_book("Gobsek"))
+
+
